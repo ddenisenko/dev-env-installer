@@ -1,0 +1,28 @@
+{
+  "name": "dev-env-installer",
+  "version": "0.0.1",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "rm -rf dist/ && ./node_modules/typescript/bin/tsc"
+  },
+  "dependencies": {
+    "underscore": "^1.8.3"
+  },
+  "typings":"dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ddenisenko/dev-env-installer.git"
+  },
+  "keywords": [
+  ],
+  "homepage": "https://github.com/ddenisenko/dev-env-installer",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/ddenisenko/dev-env-installer/issues"
+  },
+  "devDependencies": {
+    "typescript": "1.8.7",
+    "typings": "^0.5.1"
+  },
+  "bin" : "dist/cli.js"
+}
