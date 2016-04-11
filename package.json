@@ -1,6 +1,6 @@
 {
   "name": "dev-env-installer",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "main": "dist/index.js",
   "scripts": {
     "build": "rm -rf dist/ && ./node_modules/typescript/bin/tsc"
