@@ -86,7 +86,9 @@ function cloneRepositories(rootPath : string, modules: {[name:string] : moduleUt
 
         var cloneCommand = "git clone " + module.gitUrl + " --branch " + module.gitBranch + " --single-branch";
 
-        devUtils.execProcess(cloneCommand, rootPath, true)
+        if(devUtils.execProcess(cloneCommand, rootPath, true) != 0) {
+            throw new Error("Failed to clone repository " + module.gitUrl + " : " + module.gitBranch);
+        }
         var clonedModulePath = findModulePath(rootPath, module);
         if (!clonedModulePath) {
             console.log("Cloned module " + module.name + " does not match its name");
@@ -101,14 +103,18 @@ function cloneRepositories(rootPath : string, modules: {[name:string] : moduleUt
 function registerNPMModules(repositoryRoots : string[]) {
 
     repositoryRoots.forEach(moduleFolder=>{
-        devUtils.execProcess("npm link", moduleFolder, true);
+        if(devUtils.execProcess("npm link", moduleFolder, true) != 0){
+            throw new Error("Could not npm link " + moduleFolder)
+        }
     })
 }
 
 function npmInstall(repositoryRoots : string[]) {
 
     repositoryRoots.forEach(moduleFolder=>{
-        devUtils.execProcess("npm install", moduleFolder, true);
+        if(devUtils.execProcess("npm install", moduleFolder, true) != 0) {
+            throw new Error("Could not npm install " + moduleFolder)
+        }
     })
 }
 
@@ -117,7 +123,9 @@ function installTypings(repositoryRoots : string[], modules: {[name:string] : mo
     repositoryRoots.forEach(moduleFolder=>{
         var module = moduleUtils.moduleFromFolder(moduleFolder, modules);
         if (module && module.installTypings) {
-            devUtils.execProcess("typings install", moduleFolder, true);
+            if (devUtils.execProcess("typings install", moduleFolder, true) != 0) {
+                throw new Error("Could not install typings " + moduleFolder)
+            }
         }
     })
 }
@@ -155,7 +163,9 @@ function replaceDependenciesWithLinks(repositoryRoots : string[],
 
             deleteFolderRecursive(subDirectoryAbsolutePath)
 
-            devUtils.execProcess("npm link " + module.name, nodeModulesDir, true);
+            if(devUtils.execProcess("npm link " + module.name, nodeModulesDir, true) != 0) {
+                throw new Error("Could not npm link " + module.name + " in " + nodeModulesDir);
+            }
         })
     })
 }

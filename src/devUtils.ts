@@ -12,7 +12,7 @@ export function execProcess(
     messageBefore:string = '',
     messageAfter:string = '',
     messageError:string = '',
-    maxLogLength:number=-1,onError:(err)=>void=null)
+    maxLogLength:number=-1,onError:(err)=>void=null) : number
 {
     console.log("> "+wrkDir + " " + command)
     try {
@@ -41,6 +41,8 @@ export function execProcess(
                 }
             }
         }
+
+        return 0;
     }
     catch (err) {
         if (onError){
@@ -50,6 +52,8 @@ export function execProcess(
             console.log(messageError)
             console.log(err.message)
         }
+
+        return err.status;
     }
 }
 
@@ -61,7 +65,9 @@ export function pullAll(rootFolder: string, workspaceDescriptorFile: string) {
     reversedModules.forEach(module=>{
         var folder = module.fsLocation;
         if (folder) {
-            execProcess("git pull", folder, true);
+            if(execProcess("git pull", folder, true) != 0) {
+                throw new Error("Failed to pull " + folder)
+            }
         }
     })
 }
@@ -75,7 +81,11 @@ export function buildAll(rootFolder: string, workspaceDescriptorFile: string) {
         var folder = module.fsLocation;
         if (folder) {
             var buildCommand = module.buildCommand;
-            if (buildCommand) execProcess(buildCommand, folder, true);
+            if (buildCommand) {
+                if(execProcess(buildCommand, folder, true) != 0) {
+                    throw new Error("Failed to build " + folder)
+                }
+            }
         }
     })
 }
@@ -89,7 +99,11 @@ export function testAll(rootFolder: string, workspaceDescriptorFile: string) {
         var folder = module.fsLocation;
         if (folder) {
             var testCommand = module.testCommand;
-            if (testCommand) execProcess(testCommand, folder, true);
+            if (testCommand) {
+                if(execProcess(testCommand, folder, true) != 0) {
+                    throw new Error("Tests failed in " + folder)
+                }
+            }
         }
     })
 }
