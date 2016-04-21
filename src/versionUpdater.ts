@@ -82,6 +82,22 @@ export class VersionUpdater{
             gitHelper.executeCommand(publishCommand);
         }
     }
+
+    runDry(module){
+        var gitHelper = new GitHelper();
+        var packageJson:any = JSON.parse(<string><any>fs.readFileSync(module.fsLocation + '/package.json'));
+        var versionMessage : string = "v" + packageJson.version;
+        console.log("\n");
+        if (module.isDepricated) {
+            console.log("Module: '" + module.name + "' will be published with version: " + packageJson.version);
+            if (module.dependencies){
+                for (var i = 0; i< module.dependencies.length; i++){
+                    var dependencyJson:any = JSON.parse(<string><any>fs.readFileSync(module.dependencies[i].fsLocation + '/package.json'));
+                    console.log("\t Dependency: '" + module.dependencies[i].name + "' will be updated to the version " + dependencyJson.version);
+                }
+            }
+        }
+    }
 }
 
 export class GitHelper{
@@ -104,6 +120,9 @@ export class GitHelper{
 
     getLastTag(repoPath) : string{
         var tag : string = this.executeCommand("cd " + repoPath + " && git describe --abbrev=0 --tags");
+        if(!tag){
+            console.log("Warning: Repository has no tags");
+        }
         return tag;
     }
 

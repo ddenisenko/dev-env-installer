@@ -82,6 +82,9 @@ if (process.argv[2]) {
             case ("publish"):
                 devUtils.publish(workspaceRoot, workspaceDescriptor);
                 break;
+            case ("runDry"):
+                devUtils.runDry(workspaceRoot, workspaceDescriptor);
+                break;
             case ("install"):
                 installer.setUp(workspaceRoot, workspaceDescriptor);
                 break;
