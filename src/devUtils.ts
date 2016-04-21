@@ -129,4 +129,22 @@ export function updateVersions(rootFolder: string, workspaceDescriptorFile: stri
     }
 }
 
+export function publish(rootFolder: string, workspaceDescriptorFile: string){
+    var modules = modulesDetector.getModules(rootFolder, workspaceDescriptorFile);
+    var reversedModules = modules.reverse();
 
+    var updater = new versionUpdater.VersionUpdater();
+    var data = new Object();
+
+    data["packages"] = {};
+    reversedModules.forEach(module =>{
+        data["module"] = module;
+        updater.getNewVersion(data);
+    });
+
+    var packagesNames = Object.keys(data["packages"]);
+    for (var i = 0; i < packagesNames.length; i++){
+        var module = data["packages"][packagesNames[i]];
+        updater.publish(module);
+    }
+}
