@@ -89,11 +89,11 @@ export class VersionUpdater{
         var versionMessage : string = "v" + packageJson.version;
         console.log("\n");
         if (module.isDepricated) {
-            console.log("Module: '" + module.name + "' will be published with version: " + packageJson.version);
+            console.log("Module: '" + module.name + "' will be published with version: " + packageJson.version + "\nIf to execute 'dev-env-installer updateVersions' version will be updated to " + module.newVersion);
             if (module.dependencies){
                 for (var i = 0; i< module.dependencies.length; i++){
                     var dependencyJson:any = JSON.parse(<string><any>fs.readFileSync(module.dependencies[i].fsLocation + '/package.json'));
-                    console.log("\t Dependency: '" + module.dependencies[i].name + "' will be updated to the version " + dependencyJson.version);
+                    console.log("\t Dependency: '" + module.dependencies[i].name + "' will be updated to the version " + dependencyJson.version + "\n\t    If to execute 'dev-env-installer updateVersions' version will be updated to " + module.dependencies[i].newVersion);
                 }
             }
         }
