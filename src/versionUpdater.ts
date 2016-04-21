@@ -9,7 +9,7 @@ export class VersionUpdater{
         var dependencies = module.dependencies;
         var repoPath: string = module.fsLocation;
 
-        var gitStateChecker = new StateChecker();
+        var gitStateChecker = new GitHelper();
         var isDepricated : boolean = gitStateChecker.isDeprecated(repoPath);
         var hasUpdatedDependencies : boolean = false;
 
@@ -24,7 +24,6 @@ export class VersionUpdater{
                 }
             }
         }
-
         if (hasUpdatedDependencies || isDepricated) {
             module.isDepricated = isDepricated;
             module.newVersion = this.incVersion(packageJson.version);
@@ -38,7 +37,6 @@ export class VersionUpdater{
     }
 
     updateVersion(data){
-
         var module = data.module;
         if (module.isDepricated) {
             var repoPath:string = module.fsLocation;
@@ -56,7 +54,6 @@ export class VersionUpdater{
                     packageJson.dependencies[dependencyKeys[i]] = prefix + packageItem.newVersion;
                 }
             }
-
             fs.writeFileSync(repoPath + '/package.json', JSON.stringify(packageJson, null, 4));
         }
         return data;
@@ -70,26 +67,44 @@ export class VersionUpdater{
         incVersion = version.substring(0, version.lastIndexOf(sparator) + sparator.length) + lastPart;
         return incVersion;
     }
+
+    publish(module){
+        var gitHelper = new GitHelper();
+        var packageJson:any = JSON.parse(<string><any>fs.readFileSync(module.fsLocation + '/package.json'));
+        var versionMessage : string = "v" + packageJson.version;
+        var commitCommand : string = "cd " + module.fsLocation + " && git commit -a -m \"" + versionMessage + "\"";
+        var pushCommand : string = "cd " + module.fsLocation + " && git tag \"" + versionMessage + "\" && git push origin --all && git push origin --tags";
+        var publishCommand : string = "cd " + module.fsLocation + " && npm publish";
+
+        gitHelper.executeCommand(commitCommand);
+        if (gitHelper.isDeprecated(module.fsLocation) || module.isDepricated) {
+            gitHelper.executeCommand(pushCommand);
+            gitHelper.executeCommand(publishCommand);
+        }
+    }
 }
 
-export class StateChecker{
+export class GitHelper{
     executeCommand(command : string) : string{
-        var commandResult : string = <string><any>exec.execSync(command,
-            (error, stdout, stderr) => {
-                if (stderr !== null){
-                    console.log(`stderr: ${stderr}`);
-                }
-                if (error !== null) {
-                    console.log(`exec error: ${error}`);
-                }
-            }).toString();
+        var commandResult : string;
+        try {
+            commandResult = <string><any>exec.execSync(command,
+                (error, stdout, stderr) => {
+                    if (stderr !== null) {
+                        console.log(`stderr: ${stderr}`);
+                    }
+                    if (error !== null) {
+                        console.log(`exec error: ${error}`);
+                    }
+                }).toString();
+        } catch (e){
+        }
         return commandResult;
     }
 
     getLastTag(repoPath) : string{
-        var tag : string = this.executeCommand("cd " + repoPath + " && git tag");
-        var tags : string [] = tag.split(new RegExp("\n", "g"));
-        return tags[tags.length-2];
+        var tag : string = this.executeCommand("cd " + repoPath + " && git describe --abbrev=0 --tags");
+        return tag;
     }
 
     getTagCommit(repoPath, tagName) : string{
@@ -109,15 +124,16 @@ export class StateChecker{
 
     getLastRepoCommit(repoPath) : string{
         var repoCommits : string = this.executeCommand("cd " + repoPath + " && git log -1");
-        var repoCommitsLines : string[] = repoCommits.split(/\n/g);
-        var lastCommit : string;
-        for (var i = 0; i < repoCommitsLines.length; i++){
-            if (repoCommitsLines[i].match(/^commit \w+/)){
-                lastCommit = repoCommitsLines[i].substring(7);
-                break;
+        if (repoCommits) {
+            var repoCommitsLines:string[] = repoCommits.split(/\n/g);
+            var lastCommit:string;
+            for (var i = 0; i < repoCommitsLines.length; i++) {
+                if (repoCommitsLines[i].match(/^commit \w+/)) {
+                    lastCommit = repoCommitsLines[i].substring(7);
+                    break;
+                }
             }
         }
-
         return lastCommit;
     }
 

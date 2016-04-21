@@ -48,6 +48,8 @@ With current directory set to a root of the module repository:
 
 `dev-env-installer updateVersions` - for each repository in `workspace.json` in reverse order updates packages versions if package has updated dependencies or last commit has not tag.
 
+`dev-env-installer publish` - for each repository in `workspace.json` in reverse order commits changes, pushes it to the git repository and npm.
+
 Optional CLI parameters:
 * `--workspace` sets up workspace root. If not specified, workspace root is either a parent dir if executed for a module or current dir if no module is found.
 * `--descriptor` sets up `workspace.json` path. If not specified, is searched in the current dir, module dir or workspace root.
