@@ -95,7 +95,7 @@ export class VersionUpdater{
                 for (var i = 0; i< module.dependencies.length; i++){
                     if (module.dependencies[i].isDepricated) {
                         var dependencyJson:any = JSON.parse(<string><any>fs.readFileSync(module.dependencies[i].fsLocation + '/package.json'));
-                        console.log("\t Dependency: '" + module.dependencies[i].name + "' will be updated to the version " + dependencyJson.version + "\n\t    If to execute 'dev-env-installer updateVersions' version will be updated to " + module.dependencies[i].newVersion);
+                        console.log("\t Dependency: '" + module.dependencies[i].name + "' will be published with version: " + dependencyJson.version + "\n\t    If to execute 'dev-env-installer updateVersions' version will be updated to " + module.dependencies[i].newVersion);
                     }
                 }
             }
