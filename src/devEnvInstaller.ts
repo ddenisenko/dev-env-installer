@@ -70,6 +70,9 @@ function cloneRepositories(rootPath : string, modules: {[name:string] : moduleUt
                 modulePath + ", skip cloning");
 
             result.push(modulePath);
+
+            checkoutBranch(modulePath, module);
+
             return;
         }
 
@@ -81,6 +84,9 @@ function cloneRepositories(rootPath : string, modules: {[name:string] : moduleUt
                 realPath + ", skip cloning");
 
             result.push(realPath);
+
+            checkoutBranch(realPath, module);
+            
             return;
         }
 
@@ -98,6 +104,17 @@ function cloneRepositories(rootPath : string, modules: {[name:string] : moduleUt
     })
 
     return result;
+}
+
+function checkoutBranch(path : string, module : moduleUtils.DetectedModule) {
+    if (!module) return;
+
+    if (!module.gitBranch) return;
+
+    var cloneCommand = "git checkout " + module.gitBranch;
+    if(devUtils.execProcess(cloneCommand, path, true) != 0) {
+        throw new Error("Failed to clone repository " + module.gitUrl + " : " + module.gitBranch);
+    }
 }
 
 function registerNPMModules(repositoryRoots : string[]) {
