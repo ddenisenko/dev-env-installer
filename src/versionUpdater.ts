@@ -59,12 +59,13 @@ export class VersionUpdater{
         return data;
     }
 
-    incVersion(version : string) : string{
+    incVersion(rawVersion : string) : string{
+        var version : string = rawVersion.match(/(\d+\.*)+/)[0];
         var incVersion : string;
-        var sparator : string = ".";
-        var lastPart : number = parseInt(version.substr(version.lastIndexOf(sparator) + sparator.length));
+        var separator : string = ".";
+        var lastPart : number = parseInt(version.substr(version.lastIndexOf(separator) + separator.length));
         lastPart = lastPart+1;
-        incVersion = version.substring(0, version.lastIndexOf(sparator) + sparator.length) + lastPart;
+        incVersion = version.substring(0, version.lastIndexOf(separator) + separator.length) + lastPart;
         return incVersion;
     }
 
