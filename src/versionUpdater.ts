@@ -88,13 +88,15 @@ export class VersionUpdater{
         var gitHelper = new GitHelper();
         var packageJson:any = JSON.parse(<string><any>fs.readFileSync(module.fsLocation + '/package.json'));
         var versionMessage : string = "v" + packageJson.version;
-        console.log("\n");
         if (module.isDepricated) {
+            console.log("\n");
             console.log("Module: '" + module.name + "' will be published with version: " + packageJson.version + "\nIf to execute 'dev-env-installer updateVersions' version will be updated to " + module.newVersion);
             if (module.dependencies){
                 for (var i = 0; i< module.dependencies.length; i++){
-                    var dependencyJson:any = JSON.parse(<string><any>fs.readFileSync(module.dependencies[i].fsLocation + '/package.json'));
-                    console.log("\t Dependency: '" + module.dependencies[i].name + "' will be updated to the version " + dependencyJson.version + "\n\t    If to execute 'dev-env-installer updateVersions' version will be updated to " + module.dependencies[i].newVersion);
+                    if (module.dependencies[i].isDepricated) {
+                        var dependencyJson:any = JSON.parse(<string><any>fs.readFileSync(module.dependencies[i].fsLocation + '/package.json'));
+                        console.log("\t Dependency: '" + module.dependencies[i].name + "' will be updated to the version " + dependencyJson.version + "\n\t    If to execute 'dev-env-installer updateVersions' version will be updated to " + module.dependencies[i].newVersion);
+                    }
                 }
             }
         }
@@ -161,7 +163,9 @@ export class GitHelper{
         var lastTag : string = this.getLastTag(repoPath);
         var lastTagCommit : string = this.getTagCommit(repoPath, lastTag);
         var lastRepoCommit : string = this.getLastRepoCommit(repoPath);
-        var compareResult : number = lastRepoCommit.localeCompare(lastTagCommit);
+        var compareResult : number;
+        if (lastTagCommit)
+            compareResult = lastRepoCommit.localeCompare(lastTagCommit);
         if (compareResult == 0)
             return false;
         else
