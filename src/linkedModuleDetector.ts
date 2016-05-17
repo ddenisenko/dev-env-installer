@@ -107,12 +107,21 @@ export function loadModulesStaticInfo(workspaceDescriptor: string) : {[name:stri
     Object.keys(list).forEach(moduleName => {
         var obj = list[moduleName];
 
+        var branch = null;
+        if (obj.gitBranch) {
+            branch = obj.gitBranch;
+        } else if (typeof(obj.gitBranch) == "boolean") {
+            branch = null;
+        } else {
+            branch = "master";
+        }
+
         var module = {
             name : moduleName,
             buildCommand : obj.build,
             testCommand : obj.test,
             gitUrl: obj.gitUrl,
-            gitBranch: (obj.gitBranch?obj.gitBranch:"master"),
+            gitBranch: branch,
             installTypings:(obj.installTypings?obj.installTypings:false)
         }
 

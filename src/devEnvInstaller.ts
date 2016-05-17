@@ -90,7 +90,12 @@ function cloneRepositories(rootPath : string, modules: {[name:string] : moduleUt
             return;
         }
 
-        var cloneCommand = "git clone " + module.gitUrl + " --branch " + module.gitBranch + " --single-branch";
+        var cloneCommand = null;
+        if (module.gitBranch) {
+            cloneCommand = "git clone " + module.gitUrl + " --branch " + module.gitBranch + " --single-branch";
+        } else {
+            cloneCommand = "git clone " + module.gitUrl;
+        }
 
         if(devUtils.execProcess(cloneCommand, rootPath, true) != 0) {
             throw new Error("Failed to clone repository " + module.gitUrl + " : " + module.gitBranch);
