@@ -113,7 +113,7 @@ function checkoutBranch(path : string, module : moduleUtils.DetectedModule) {
 
     var cloneCommand = "git checkout " + module.gitBranch;
     if(devUtils.execProcess(cloneCommand, path, true) != 0) {
-        throw new Error("Failed to clone repository " + module.gitUrl + " : " + module.gitBranch);
+        console.log("Failed to checkout branch : " + module.gitBranch);
     }
 }
 
