@@ -98,7 +98,8 @@ function cloneRepositories(rootPath : string, modules: {[name:string] : moduleUt
         }
 
         if(devUtils.execProcess(cloneCommand, rootPath, true) != 0) {
-            throw new Error("Failed to clone repository " + module.gitUrl + " : " + module.gitBranch);
+            console.log("Failed to clone repository " + module.gitUrl + " : " + module.gitBranch);
+            return;
         }
         var clonedModulePath = findModulePath(rootPath, module);
         if (!clonedModulePath) {
