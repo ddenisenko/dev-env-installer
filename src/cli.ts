@@ -76,13 +76,19 @@ if (process.argv[2]) {
             case ("testall"):
                 devUtils.testAll(workspaceRoot, workspaceDescriptor);
                 break;
+            case ("updateVersions"):
+                devUtils.updateVersions(workspaceRoot, workspaceDescriptor);
+                break;
+            case ("publish"):
+                devUtils.publish(workspaceRoot, workspaceDescriptor);
+                break;
             case ("install"):
                 installer.setUp(workspaceRoot, workspaceDescriptor);
                 break;
             default:
-                console.log("Command required, one of: pullall, buildall, testall, install");
+                console.log("Command required, one of: pullall, buildall, testall, updateVersions, publish, install");
         }
     }
 } else {
-    console.log("Command required, one of: pullall, buildall, testall, install");
+    console.log("Command required, one of: pullall, buildall, testall, updateVersions, publish, install");
 }
