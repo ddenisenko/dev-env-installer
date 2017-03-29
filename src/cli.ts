@@ -5,7 +5,8 @@ import fs = require("fs");
 import devUtils = require("./devUtils")
 import installer = require("./devEnvInstaller")
 
-var workspaceDescriptorFileName = "workspace.json";
+const workspaceDescriptorFileName = "workspace.json";
+const requiredCommandErrorMessage = "Command required, one of: pullall, buildall, testall, install, symlink";
 
 function getCliArgumentByName(argumentName : string) {
     for(var i = 0 ; i < process.argv.length ; i++){
@@ -96,9 +97,10 @@ if (process.argv[2]) {
                 installer.createSymlinks(workspaceRoot, workspaceDescriptor);
                 break;
             default:
-                console.log("Command required, one of: pullall, buildall, testall, install");
+                console.log(requiredCommandErrorMessage);
         }
     }
 } else {
-    console.log("Command required, one of: pullall, buildall, testall, install, symllink");
+    console.log(requiredCommandErrorMessage);
 }
+
