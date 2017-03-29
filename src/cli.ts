@@ -100,5 +100,5 @@ if (process.argv[2]) {
         }
     }
 } else {
-    console.log("Command required, one of: pullall, buildall, testall, install");
+    console.log("Command required, one of: pullall, buildall, testall, install, symllink");
 }

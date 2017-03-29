@@ -245,17 +245,16 @@ function replaceDependenciesWithSymlinks(repositoryRoots : string[],
             let repoPath = repositoryMap[moduleRepoName];
             if(repoPath){
                 deleteFolderRecursive(dependencyPath);
-                let linkCommand:string;
                 if(isWin){
-                    linkCommand = `mklink /J "${dependencyPath}" "${repoPath}"`;
+                    let linkCommand = `mklink /J "${dependencyPath}" "${repoPath}"`;
+                    if (devUtils.execProcess(linkCommand, nodeModulesDir, true) != 0) {
+                        throw new Error(`Could not create symlink link: '${linkCommand}'`);
+                    }
                 }
                 else{
-                    linkCommand = `ln -s "${repoPath}" "${dependencyPath}"`;
+                    fs.symlinkSync(repoPath,dependencyPath);
+                    console.log(`Symlink created from '${repoPath}' to '${dependencyPath}'`);
                 }
-                if (devUtils.execProcess(linkCommand, nodeModulesDir, true) != 0) {
-                    throw new Error(`Could not create symlink link: '${linkCommand}'`);
-                }
-                //fs.symlinkSync(repoPath,dependencyPath, "dir");
             }
         }
     }
