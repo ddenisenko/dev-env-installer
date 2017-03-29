@@ -57,6 +57,10 @@ function findModulePath(folder : string, module: moduleUtils.DetectedModule): st
  */
 function cloneRepositories(rootPath : string, modules: {[name:string] : moduleUtils.DetectedModule}) : string[] {
 
+    if(!path.isAbsolute(rootPath)){
+        rootPath = path.resolve(process.cwd(),rootPath);
+    }
+
     var existingModules = getExistingModules(rootPath, modules);
 
     var result : string[] = [];

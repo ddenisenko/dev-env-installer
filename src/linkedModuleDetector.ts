@@ -98,6 +98,10 @@ export function subDirectories(folder : string) : string[] {
 }
 
 export function loadModulesStaticInfo(workspaceDescriptor: string) : {[name:string] : DetectedModule} {
+    
+    if(!path.isAbsolute(workspaceDescriptor)){
+        workspaceDescriptor = path.resolve(process.cwd(),workspaceDescriptor);
+    }
 
     var modulesListContent = fs.readFileSync(workspaceDescriptor).toString();
 
