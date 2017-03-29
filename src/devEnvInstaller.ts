@@ -155,6 +155,10 @@ function installTypings(repositoryRoots : string[], modules: {[name:string] : mo
 
 function deleteFolderRecursive(folder : string) {
     if(fs.existsSync(folder) ) {
+        if(fs.lstatSync(folder).isSymbolicLink()){
+            fs.unlinkSync(folder);
+            return;
+        }
         fs.readdirSync(folder).forEach(fileName=>{
             var childPath = path.join(folder, fileName);
             if(fs.lstatSync(childPath).isDirectory()) {
@@ -171,17 +175,17 @@ function deleteFolderRecursive(folder : string) {
 function replaceDependenciesWithLinks(repositoryRoots : string[],
                                       modules: {[name:string] : moduleUtils.DetectedModule}) {
     repositoryRoots.forEach(repositoryRoot=>{
-        var nodeModulesDir = path.join(repositoryRoot, "node_modules");
+        let nodeModulesDir = path.join(repositoryRoot, "node_modules");
         if (!fs.existsSync(nodeModulesDir)) {
             fs.mkdir(nodeModulesDir);
         }
 
         moduleUtils.subDirectories(nodeModulesDir).forEach(subDirectoryName=>{
-            var subDirectoryAbsolutePath = path.join(nodeModulesDir, subDirectoryName);
+            let subDirectoryAbsolutePath = path.join(nodeModulesDir, subDirectoryName);
 
             if (fs.realpathSync(subDirectoryAbsolutePath) != subDirectoryAbsolutePath) return;
 
-            var module = moduleUtils.moduleFromFolder(subDirectoryAbsolutePath, modules);
+            let module = moduleUtils.moduleFromFolder(subDirectoryAbsolutePath, modules);
             if (!module) return;
 
             deleteFolderRecursive(subDirectoryAbsolutePath)
@@ -189,11 +193,78 @@ function replaceDependenciesWithLinks(repositoryRoots : string[],
             if(devUtils.execProcess("npm link " + module.name, nodeModulesDir, true) != 0) {
                 throw new Error("Could not npm link " + module.name + " in " + nodeModulesDir);
             }
-        })
-    })
+        });
+    });
 }
 
-function setupModules(repositoryRoots : string[], modules: {[name:string] : moduleUtils.DetectedModule}) {
+function replaceDependenciesWithSymlinks(repositoryRoots : string[],
+                                      modules: {[name:string] : moduleUtils.DetectedModule}) {
+
+    let isWin = devUtils.isWindows();
+    let repositoryMap:any = {};
+    for(var repositoryRoot of repositoryRoots){
+        repositoryMap[path.basename(repositoryRoot)] = repositoryRoot;
+    }
+
+    for(var repositoryRoot of repositoryRoots){
+        let nodeModulesDir = path.join(repositoryRoot, "node_modules");
+        if (!fs.existsSync(nodeModulesDir)) {
+            fs.mkdirSync(nodeModulesDir);
+        }
+        
+        let packageJsonPath = path.resolve(repositoryRoot,"package.json");
+        if(!fs.existsSync(packageJsonPath)){
+            continue;
+        }
+        let packageJson:any;
+        try{
+            packageJson = JSON.parse(fs.readFileSync(packageJsonPath,"utf8"));
+        }
+        catch(e){
+            console.log("Failed to read " + packageJsonPath + ":");
+            console.log(e);
+            continue;
+        }
+        let dependencies = packageJson['dependencies'];
+        let optDependencies = packageJson['optionalDependencies'];
+        if(!dependencies && ! optDependencies){
+            continue;
+        }
+        dependencies = dependencies || {};
+        optDependencies = optDependencies || {};
+
+        for(var moduleName of Object.keys(modules)) {
+
+            if(!dependencies[moduleName]&&!optDependencies[moduleName]){
+                continue;
+            }
+
+            let dependencyPath = path.resolve(nodeModulesDir,moduleName);
+            let module = modules[moduleName];
+            let moduleRepoName = getModuleGitFolderName(module);
+            let repoPath = repositoryMap[moduleRepoName];
+            if(repoPath){
+                deleteFolderRecursive(dependencyPath);
+                let linkCommand:string;
+                if(isWin){
+                    linkCommand = `mklink /J "${dependencyPath}" "${repoPath}"`;
+                }
+                else{
+                    linkCommand = `ln -s "${repoPath}" "${dependencyPath}"`;
+                }
+                if (devUtils.execProcess(linkCommand, nodeModulesDir, true) != 0) {
+                    throw new Error(`Could not create symlink link: '${linkCommand}'`);
+                }
+                //fs.symlinkSync(repoPath,dependencyPath, "dir");
+            }
+        }
+    }
+}
+
+function setupModules(
+    repositoryRoots : string[],
+    modules: {[name:string] : moduleUtils.DetectedModule},
+    useSymlinks:boolean) {
 
     registerNPMModules(repositoryRoots);
 
@@ -201,15 +272,30 @@ function setupModules(repositoryRoots : string[], modules: {[name:string] : modu
 
     installTypings(repositoryRoots, modules);
 
-    replaceDependenciesWithLinks(repositoryRoots, modules);
+    if(useSymlinks){
+        replaceDependenciesWithSymlinks(repositoryRoots, modules);
+    }
+    else {
+        replaceDependenciesWithLinks(repositoryRoots, modules);
+    }
 }
 
-export function setUp(rootFolder : string, workspaceDescriptorFile : string) {
+export function setUp(rootFolder : string, workspaceDescriptorFile : string, useSymlinks=false) {
 
-    var staticModulesMap = moduleUtils.loadModulesStaticInfo(workspaceDescriptorFile);
+    let staticModulesMap = moduleUtils.loadModulesStaticInfo(workspaceDescriptorFile);
 
-    var repositoryRoots = cloneRepositories(rootFolder, staticModulesMap)
+    let repositoryRoots = cloneRepositories(rootFolder, staticModulesMap);
 
-    repositoryRoots.forEach(repositoryRoot=>console.log("Reporoot: " + repositoryRoot))
-    setupModules(repositoryRoots, staticModulesMap);
+    repositoryRoots.forEach(repositoryRoot=>console.log("Reporoot: " + repositoryRoot));
+    setupModules(repositoryRoots, staticModulesMap,useSymlinks);
+}
+
+export function createSymlinks(rootFolder : string, workspaceDescriptorFile : string) {
+
+    let staticModulesMap = moduleUtils.loadModulesStaticInfo(workspaceDescriptorFile);
+
+    let repositoryRoots = cloneRepositories(rootFolder, staticModulesMap);
+
+    repositoryRoots.forEach(repositoryRoot=>console.log("Reporoot: " + repositoryRoot));
+    replaceDependenciesWithSymlinks(repositoryRoots, staticModulesMap);
 }

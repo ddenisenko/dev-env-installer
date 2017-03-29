@@ -108,4 +108,7 @@ export function testAll(rootFolder: string, workspaceDescriptorFile: string) {
     })
 }
 
-
+export function isWindows():boolean{
+    let osId = process.platform;
+    return osId.indexOf("win") == 0;
+}

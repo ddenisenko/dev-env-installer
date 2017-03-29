@@ -17,6 +17,18 @@ function getCliArgumentByName(argumentName : string) {
     return null;
 }
 
+function hasCliArgument(argumentName : string, mustHaveValue=false) {
+    for(var i = 0 ; i < process.argv.length ; i++){
+        if(process.argv[i]==argumentName){
+            if(mustHaveValue){
+                return i < process.argv.length-1;
+            }
+            return true;
+        }
+    }
+    return false;
+}
+
 function findWorkspaceRoot() {
     var cliWorkspaceArg = getCliArgumentByName("--workspace");
     if (cliWorkspaceArg) {
@@ -61,6 +73,7 @@ if (process.argv[2]) {
     var workspaceRoot = findWorkspaceRoot();
 
     var workspaceDescriptor = findWorkspaceDescriptor(workspaceRoot);
+    var useSymlinks = hasCliArgument("-symlink");
 
     if (workspaceRoot && workspaceDescriptor) {
         console.log("Workspace root is: " + workspaceRoot);
@@ -77,7 +90,10 @@ if (process.argv[2]) {
                 devUtils.testAll(workspaceRoot, workspaceDescriptor);
                 break;
             case ("install"):
-                installer.setUp(workspaceRoot, workspaceDescriptor);
+                installer.setUp(workspaceRoot, workspaceDescriptor,useSymlinks);
+                break;
+            case ("symlink"):
+                installer.createSymlinks(workspaceRoot, workspaceDescriptor);
                 break;
             default:
                 console.log("Command required, one of: pullall, buildall, testall, install");
