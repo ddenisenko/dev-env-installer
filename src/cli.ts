@@ -6,7 +6,7 @@ import devUtils = require("./devUtils")
 import installer = require("./devEnvInstaller")
 
 const workspaceDescriptorFileName = "workspace.json";
-const requiredCommandErrorMessage = "Command required, one of: pullall, buildall, testall, install, symlink";
+const requiredCommandErrorMessage = "Command required, one of: pullall, buildall, testall, install, setdirectlinks";
 
 function getCliArgumentByName(argumentName : string) {
     for(var i = 0 ; i < process.argv.length ; i++){
@@ -74,7 +74,7 @@ if (process.argv[2]) {
     var workspaceRoot = findWorkspaceRoot();
 
     var workspaceDescriptor = findWorkspaceDescriptor(workspaceRoot);
-    var useSymlinks = hasCliArgument("-symlink");
+    var useDirectSymlinks = hasCliArgument("-directlinks");
 
     if (workspaceRoot && workspaceDescriptor) {
         console.log("Workspace root is: " + workspaceRoot);
@@ -91,9 +91,9 @@ if (process.argv[2]) {
                 devUtils.testAll(workspaceRoot, workspaceDescriptor);
                 break;
             case ("install"):
-                installer.setUp(workspaceRoot, workspaceDescriptor,useSymlinks);
+                installer.setUp(workspaceRoot, workspaceDescriptor,useDirectSymlinks);
                 break;
-            case ("symlink"):
+            case ("setdirectlinks"):
                 installer.createSymlinks(workspaceRoot, workspaceDescriptor);
                 break;
             default:

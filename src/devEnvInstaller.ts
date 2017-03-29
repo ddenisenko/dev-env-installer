@@ -197,7 +197,7 @@ function replaceDependenciesWithLinks(repositoryRoots : string[],
     });
 }
 
-function replaceDependenciesWithSymlinks(repositoryRoots : string[],
+function replaceDependenciesWithDirectSymlinks(repositoryRoots : string[],
                                       modules: {[name:string] : moduleUtils.DetectedModule}) {
 
     let isWin = devUtils.isWindows();
@@ -263,16 +263,18 @@ function replaceDependenciesWithSymlinks(repositoryRoots : string[],
 function setupModules(
     repositoryRoots : string[],
     modules: {[name:string] : moduleUtils.DetectedModule},
-    useSymlinks:boolean) {
+    useDirectSymlinks:boolean) {
 
-    registerNPMModules(repositoryRoots);
+    if(!useDirectSymlinks) {
+        registerNPMModules(repositoryRoots);
+    }
 
     npmInstall(repositoryRoots);
 
     installTypings(repositoryRoots, modules);
 
-    if(useSymlinks){
-        replaceDependenciesWithSymlinks(repositoryRoots, modules);
+    if(useDirectSymlinks){
+        replaceDependenciesWithDirectSymlinks(repositoryRoots, modules);
     }
     else {
         replaceDependenciesWithLinks(repositoryRoots, modules);
@@ -296,5 +298,5 @@ export function createSymlinks(rootFolder : string, workspaceDescriptorFile : st
     let repositoryRoots = cloneRepositories(rootFolder, staticModulesMap);
 
     repositoryRoots.forEach(repositoryRoot=>console.log("Reporoot: " + repositoryRoot));
-    replaceDependenciesWithSymlinks(repositoryRoots, staticModulesMap);
+    replaceDependenciesWithDirectSymlinks(repositoryRoots, staticModulesMap);
 }
