@@ -1,5 +1,6 @@
-import devUtils = require("./devUtils")
-import installer = require("./devEnvInstaller")
+import devUtils = require("./devUtils");
+import installer = require("./devEnvInstaller");
+export import utils = require("./exportedUtils");
 
 /**
  * Performs a pull for all modules.

@@ -3,35 +3,15 @@
 import path = require("path");
 import fs = require("fs");
 import devUtils = require("./devUtils")
+import utils = require("./exportedUtils");
 import installer = require("./devEnvInstaller")
 
 const workspaceDescriptorFileName = "workspace.json";
 const requiredCommandErrorMessage = "Command required, one of: pullall, buildall, testall, install, setdirectlinks";
 
-function getCliArgumentByName(argumentName : string) {
-    for(var i = 0 ; i < process.argv.length ; i++){
-        if(process.argv[i]==argumentName && i < process.argv.length-1){
-            return process.argv[i+1];
-        }
-    }
-
-    return null;
-}
-
-function hasCliArgument(argumentName : string, mustHaveValue=false) {
-    for(var i = 0 ; i < process.argv.length ; i++){
-        if(process.argv[i]==argumentName){
-            if(mustHaveValue){
-                return i < process.argv.length-1;
-            }
-            return true;
-        }
-    }
-    return false;
-}
 
 function findWorkspaceRoot() {
-    var cliWorkspaceArg = getCliArgumentByName("--workspace");
+    var cliWorkspaceArg = utils.getCliArgumentByName("--workspace");
     if (cliWorkspaceArg) {
         return cliWorkspaceArg;
     }
@@ -46,7 +26,7 @@ function findWorkspaceRoot() {
 
 function findWorkspaceDescriptor(workspaceRoot : string) {
 
-    var cliDescriptorArg = getCliArgumentByName("--descriptor");
+    var cliDescriptorArg = utils.getCliArgumentByName("--descriptor");
     if (cliDescriptorArg) {
         return cliDescriptorArg;
     }
@@ -74,7 +54,7 @@ if (process.argv[2]) {
     var workspaceRoot = findWorkspaceRoot();
 
     var workspaceDescriptor = findWorkspaceDescriptor(workspaceRoot);
-    var useDirectSymlinks = hasCliArgument("-directlinks");
+    var useDirectSymlinks = utils.hasCliArgument("-directlinks");
 
     if (workspaceRoot && workspaceDescriptor) {
         console.log("Workspace root is: " + workspaceRoot);

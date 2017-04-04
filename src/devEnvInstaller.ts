@@ -3,6 +3,7 @@ import moduleUtils = require("./linkedModuleDetector")
 import devUtils = require("./devUtils")
 import path = require("path");
 import fs = require("fs");
+import utils = require("./exportedUtils")
 
 function getModuleGitFolderName(module : moduleUtils.DetectedModule) : string {
     var lastSlashPos = module.gitUrl.lastIndexOf("/");
@@ -101,7 +102,7 @@ function cloneRepositories(rootPath : string, modules: {[name:string] : moduleUt
             cloneCommand = "git clone " + module.gitUrl;
         }
 
-        if(devUtils.execProcess(cloneCommand, rootPath, true) != 0) {
+        if(utils.execProcess(cloneCommand, rootPath, true) != 0) {
             console.log("Failed to clone repository " + module.gitUrl + " : " + module.gitBranch);
             return;
         }
@@ -122,7 +123,7 @@ function checkoutBranch(path : string, module : moduleUtils.DetectedModule) {
     if (!module.gitBranch) return;
 
     var cloneCommand = "git checkout " + module.gitBranch;
-    if(devUtils.execProcess(cloneCommand, path, true) != 0) {
+    if(utils.execProcess(cloneCommand, path, true) != 0) {
         console.log("Failed to checkout branch : " + module.gitBranch);
     }
 }
@@ -130,7 +131,7 @@ function checkoutBranch(path : string, module : moduleUtils.DetectedModule) {
 function registerNPMModules(repositoryRoots : string[]) {
 
     repositoryRoots.forEach(moduleFolder=>{
-        if(devUtils.execProcess("npm link", moduleFolder, true) != 0){
+        if(utils.execProcess("npm link", moduleFolder, true) != 0){
             throw new Error("Could not npm link " + moduleFolder)
         }
     })
@@ -139,7 +140,7 @@ function registerNPMModules(repositoryRoots : string[]) {
 function npmInstall(repositoryRoots : string[]) {
 
     repositoryRoots.forEach(moduleFolder=>{
-        if(devUtils.execProcess("npm install", moduleFolder, true) != 0) {
+        if(utils.execProcess("npm install", moduleFolder, true) != 0) {
             throw new Error("Could not npm install " + moduleFolder)
         }
     })
@@ -150,7 +151,7 @@ function installTypings(repositoryRoots : string[], modules: {[name:string] : mo
     repositoryRoots.forEach(moduleFolder=>{
         var module = moduleUtils.moduleFromFolder(moduleFolder, modules);
         if (module && module.installTypings) {
-            if (devUtils.execProcess("typings install", moduleFolder, true) != 0) {
+            if (utils.execProcess("typings install", moduleFolder, true) != 0) {
                 throw new Error("Could not install typings " + moduleFolder)
             }
         }
@@ -194,7 +195,7 @@ function replaceDependenciesWithLinks(repositoryRoots : string[],
 
             deleteFolderRecursive(subDirectoryAbsolutePath)
 
-            if(devUtils.execProcess("npm link " + module.name, nodeModulesDir, true) != 0) {
+            if(utils.execProcess("npm link " + module.name, nodeModulesDir, true) != 0) {
                 throw new Error("Could not npm link " + module.name + " in " + nodeModulesDir);
             }
         });
@@ -204,7 +205,6 @@ function replaceDependenciesWithLinks(repositoryRoots : string[],
 function replaceDependenciesWithDirectSymlinks(repositoryRoots : string[],
                                       modules: {[name:string] : moduleUtils.DetectedModule}) {
 
-    let isWin = devUtils.isWindows();
     let repositoryMap:any = {};
     for(var repositoryRoot of repositoryRoots){
         repositoryMap[path.basename(repositoryRoot)] = repositoryRoot;
@@ -249,16 +249,7 @@ function replaceDependenciesWithDirectSymlinks(repositoryRoots : string[],
             let repoPath = repositoryMap[moduleRepoName];
             if(repoPath){
                 deleteFolderRecursive(dependencyPath);
-                if(isWin){
-                    let linkCommand = `mklink /J "${dependencyPath}" "${repoPath}"`;
-                    if (devUtils.execProcess(linkCommand, nodeModulesDir, true) != 0) {
-                        throw new Error(`Could not create symlink link: '${linkCommand}'`);
-                    }
-                }
-                else{
-                    fs.symlinkSync(repoPath,dependencyPath);
-                    console.log(`Symlink created from '${repoPath}' to '${dependencyPath}'`);
-                }
+                utils.createSymlink(dependencyPath,repoPath);
             }
         }
     }
