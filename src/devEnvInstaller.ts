@@ -249,7 +249,7 @@ function replaceDependenciesWithDirectSymlinks(repositoryRoots : string[],
             let repoPath = repositoryMap[moduleRepoName];
             if(repoPath){
                 deleteFolderRecursive(dependencyPath);
-                utils.createSymlink(dependencyPath,repoPath);
+                utils.createSymlink(repoPath,dependencyPath);
             }
         }
     }
