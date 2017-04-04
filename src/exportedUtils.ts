@@ -81,7 +81,7 @@ export function hasCliArgument(argumentName : string, mustHaveValue=false) {
 export function createSymlink(absoluteSrc:string, absoluteDst:string){
 
     if(isWindows()){
-        let linkCommand = `mklink /J "${absoluteDst}" "${absoluteSrc}"`;
+        let linkCommand = `mklink /J "${absoluteSrc}" "${absoluteDst}"`;
         if (execProcess(linkCommand, path.dirname(absoluteDst), true) != 0) {
             throw new Error(`Could not create symlink link: '${linkCommand}'`);
         }
