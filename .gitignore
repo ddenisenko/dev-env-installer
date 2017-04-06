@@ -6,5 +6,6 @@
 /src/**/*.d.ts
 
 *.iml
+.project
 
 /dist/
