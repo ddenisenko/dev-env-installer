@@ -54,7 +54,3 @@ export function testAll(rootFolder: string, workspaceDescriptorFile: string) {
         }
     })
 }
-
-export function loadModulesStaticInfo(workspaceDescriptor: string) : {[name:string] : index.DetectedModule} {
-    return modulesDetector.loadModulesStaticInfo(workspaceDescriptor);
-}

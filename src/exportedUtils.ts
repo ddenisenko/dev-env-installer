@@ -1,6 +1,7 @@
 import cp = require('child_process')
 import fs = require("fs");
 import path = require("path");
+import modulesDetector = require("./linkedModuleDetector");
 
 export function execProcess(
     command:string,
@@ -95,4 +96,8 @@ export function createSymlink(absoluteSrc:string, absoluteDst:string){
 export function isWindows():boolean{
     let osId = process.platform;
     return osId.indexOf("win") == 0;
+}
+
+export function loadModulesStaticInfo(workspaceDescriptor: string) : {[name:string] : index.DetectedModule} {
+    return modulesDetector.loadModulesStaticInfo(workspaceDescriptor);
 }
