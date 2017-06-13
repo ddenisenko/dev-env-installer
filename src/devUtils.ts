@@ -2,7 +2,6 @@
 
 import modulesDetector = require("./linkedModuleDetector");
 import utils = require("./exportedUtils");
-import index = require("./index");
 
 export function pullAll(rootFolder: string, workspaceDescriptorFile: string) {
     var modules = modulesDetector.getModules(rootFolder, workspaceDescriptorFile);

@@ -1,6 +1,7 @@
 import cp = require('child_process')
 import fs = require("fs");
 import path = require("path");
+import index = require("./index");
 import modulesDetector = require("./linkedModuleDetector");
 
 export function execProcess(
