@@ -37,3 +37,14 @@ export function testAll(workspaceRootFolder: string, workspaceDescriptorFile: st
 export function installWorkspace(workspaceRootFolder : string, workspaceDescriptorFile : string) {
     installer.setUp(workspaceRootFolder, workspaceDescriptorFile);
 }
+
+export interface DetectedModule {
+    name : string,
+    buildCommand : string,
+    testCommand : string,
+    fsLocation : string,
+    dependencies : DetectedModule[],
+    gitUrl: string,
+    gitBranch: string,
+    installTypings: boolean
+}

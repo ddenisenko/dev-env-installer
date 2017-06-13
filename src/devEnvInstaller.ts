@@ -4,8 +4,9 @@ import devUtils = require("./devUtils")
 import path = require("path");
 import fs = require("fs");
 import utils = require("./exportedUtils")
+import index = require("./index");
 
-function getModuleGitFolderName(module : moduleUtils.DetectedModule) : string {
+function getModuleGitFolderName(module : index.DetectedModule) : string {
     var lastSlashPos = module.gitUrl.lastIndexOf("/");
     var gitExtPos = module.gitUrl.lastIndexOf(".git");
     if (gitExtPos == -1) gitExtPos = module.gitUrl.length;
@@ -14,12 +15,12 @@ function getModuleGitFolderName(module : moduleUtils.DetectedModule) : string {
     return moduleName;
 }
 
-function getExistingModules(folder : string, modulesToTest: {[name:string] : moduleUtils.DetectedModule})
-    : {[name:string] : moduleUtils.DetectedModule} {
+function getExistingModules(folder : string, modulesToTest: {[name:string] : index.DetectedModule})
+    : {[name:string] : index.DetectedModule} {
 
     if (!fs.existsSync(folder)) return {};
 
-    var result : {[name:string] : moduleUtils.DetectedModule} = {}
+    var result : {[name:string] : index.DetectedModule} = {}
 
     moduleUtils.subDirectories(folder).forEach(subDirectory=>{
         var absolutePath = path.join(folder,subDirectory);
@@ -33,11 +34,11 @@ function getExistingModules(folder : string, modulesToTest: {[name:string] : mod
     return result;
 }
 
-function findModulePath(folder : string, module: moduleUtils.DetectedModule): string {
+function findModulePath(folder : string, module: index.DetectedModule): string {
 
     if (!fs.existsSync(folder)) return null;
 
-    var modules : {[name:string] : moduleUtils.DetectedModule} = {}
+    var modules : {[name:string] : index.DetectedModule} = {}
     modules[module.name] = module;
 
     moduleUtils.subDirectories(folder).forEach(subDirectory=>{
@@ -56,7 +57,7 @@ function findModulePath(folder : string, module: moduleUtils.DetectedModule): st
  * @param rootPath
  * @param module
  */
-function cloneRepositories(rootPath : string, modules: {[name:string] : moduleUtils.DetectedModule}) : string[] {
+function cloneRepositories(rootPath : string, modules: {[name:string] : index.DetectedModule}) : string[] {
 
     if(!path.isAbsolute(rootPath)){
         rootPath = path.resolve(process.cwd(),rootPath);
@@ -117,7 +118,7 @@ function cloneRepositories(rootPath : string, modules: {[name:string] : moduleUt
     return result;
 }
 
-function checkoutBranch(path : string, module : moduleUtils.DetectedModule) {
+function checkoutBranch(path : string, module : index.DetectedModule) {
     if (!module) return;
 
     if (!module.gitBranch) return;
@@ -146,7 +147,7 @@ function npmInstall(repositoryRoots : string[]) {
     })
 }
 
-function installTypings(repositoryRoots : string[], modules: {[name:string] : moduleUtils.DetectedModule}) {
+function installTypings(repositoryRoots : string[], modules: {[name:string] : index.DetectedModule}) {
 
     repositoryRoots.forEach(moduleFolder=>{
         var module = moduleUtils.moduleFromFolder(moduleFolder, modules);
@@ -178,7 +179,7 @@ function deleteFolderRecursive(folder : string) {
 };
 
 function replaceDependenciesWithLinks(repositoryRoots : string[],
-                                      modules: {[name:string] : moduleUtils.DetectedModule}) {
+                                      modules: {[name:string] : index.DetectedModule}) {
     repositoryRoots.forEach(repositoryRoot=>{
         let nodeModulesDir = path.join(repositoryRoot, "node_modules");
         if (!fs.existsSync(nodeModulesDir)) {
@@ -203,7 +204,7 @@ function replaceDependenciesWithLinks(repositoryRoots : string[],
 }
 
 function replaceDependenciesWithDirectSymlinks(repositoryRoots : string[],
-                                      modules: {[name:string] : moduleUtils.DetectedModule}) {
+                                      modules: {[name:string] : index.DetectedModule}) {
 
     let repositoryMap:any = {};
     for(var repositoryRoot of repositoryRoots){
@@ -257,7 +258,7 @@ function replaceDependenciesWithDirectSymlinks(repositoryRoots : string[],
 
 function setupModules(
     repositoryRoots : string[],
-    modules: {[name:string] : moduleUtils.DetectedModule},
+    modules: {[name:string] : index.DetectedModule},
     useDirectSymlinks:boolean) {
 
     if(!useDirectSymlinks) {

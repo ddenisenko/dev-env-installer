@@ -5,21 +5,10 @@
 import fs = require("fs");
 import path = require("path");
 import _=require("underscore")
+import index = require("./index");
 
-
-export interface DetectedModule {
-    name : string,
-    buildCommand : string,
-    testCommand : string,
-    fsLocation : string,
-    dependencies : DetectedModule[],
-    gitUrl: string,
-    gitBranch: string,
-    installTypings: boolean
-}
-
-function detectModulesInFolder(folder : string, modulesToDetect : {[name:string] : DetectedModule},
-                               parent : DetectedModule) {
+function detectModulesInFolder(folder : string, modulesToDetect : {[name:string] : index.DetectedModule},
+                               parent : index.DetectedModule) {
 
     var nodeModulesFolder = path.join(folder, "node_modules");
     if (!fs.existsSync(nodeModulesFolder)) nodeModulesFolder = folder;
@@ -47,9 +36,9 @@ function detectModulesInFolder(folder : string, modulesToDetect : {[name:string]
     })
 }
 
-export function getModules(rootFolder : string, workspaceDescriptorFile: string) : DetectedModule[] {
+export function getModules(rootFolder : string, workspaceDescriptorFile: string) : index.DetectedModule[] {
 
-    var result : DetectedModule[] = [];
+    var result : index.DetectedModule[] = [];
 
     var modulesMap = loadModulesStaticInfo(workspaceDescriptorFile);
     var rootModule = moduleFromFolder(rootFolder, modulesMap);
@@ -66,7 +55,7 @@ export function getModules(rootFolder : string, workspaceDescriptorFile: string)
     return result;
 }
 
-export function moduleFromFolder(folder : string, modulesToDetect : {[name:string] : DetectedModule}) : DetectedModule {
+export function moduleFromFolder(folder : string, modulesToDetect : {[name:string] : index.DetectedModule}) : index.DetectedModule {
     var moduleFolderName = path.basename(folder);
     var moduleName = getModuleName(folder);
 
@@ -97,7 +86,7 @@ export function subDirectories(folder : string) : string[] {
     });
 }
 
-export function loadModulesStaticInfo(workspaceDescriptor: string) : {[name:string] : DetectedModule} {
+export function loadModulesStaticInfo(workspaceDescriptor: string) : {[name:string] : index.DetectedModule} {
 
     if(!path.isAbsolute(workspaceDescriptor)){
         workspaceDescriptor = path.resolve(process.cwd(),workspaceDescriptor);
@@ -107,7 +96,7 @@ export function loadModulesStaticInfo(workspaceDescriptor: string) : {[name:stri
 
     var list = JSON.parse(modulesListContent);
 
-    var result : {[name:string] : DetectedModule} = {};
+    var result : {[name:string] : index.DetectedModule} = {};
     Object.keys(list).forEach(moduleName => {
         var obj = list[moduleName];
 
@@ -129,7 +118,7 @@ export function loadModulesStaticInfo(workspaceDescriptor: string) : {[name:stri
             installTypings:(obj.installTypings?obj.installTypings:false)
         }
 
-        result[moduleName] = <DetectedModule>module;
+        result[moduleName] = <index.DetectedModule>module;
     })
 
     return result;
