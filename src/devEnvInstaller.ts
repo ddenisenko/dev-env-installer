@@ -1,4 +1,3 @@
-/// <reference path="../typings/main.d.ts" />
 import moduleUtils = require("./linkedModuleDetector")
 import devUtils = require("./devUtils")
 import path = require("path");

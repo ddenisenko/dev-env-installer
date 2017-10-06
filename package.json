@@ -1,6 +1,6 @@
 {
   "name": "dev-env-installer",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "main": "dist/index.js",
   "scripts": {
     "build": "rimraf dist && tsc"
@@ -21,8 +21,9 @@
     "url": "https://github.com/ddenisenko/dev-env-installer/issues"
   },
   "devDependencies": {
-    "typescript": "1.8.7",
-    "typings": "^0.5.1",
+    "@types/node": "4.2.20",
+    "@types/underscore": "^1.8.3",
+    "typescript": "2.5.2",
     "rimraf":"*"
   },
   "bin" : "dist/cli.js"
